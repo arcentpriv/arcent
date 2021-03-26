@@ -26,7 +26,7 @@ async def impostor(event):
         try:
             user = await event.client.get_entity(inputArgs)
         except:
-            return await event.edit("**Nome de usuário/ID inválido.")
+            return await event.edit("**Nome de usuário/ID inválido.**")
         userObj = await event.client(GetFullUserRequest(user))
     elif event.reply_to_msg_id:
         replyMessage = await event.get_reply_message()
