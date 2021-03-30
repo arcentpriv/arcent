@@ -110,6 +110,10 @@
       "description": "Seu client_secret.json.",
       "required": false
     },
+    "G_DRIVE_INDEX_URL": {
+      "description": "Your Cloudflare Google Drive Index URL",
+      "required": false
+    },
     "GENIUS_ACCESS_TOKEN": {
       "description": "Token de acesso do cliente de https://genius.com/api-clients, necessário para o módulo de letras.",
       "required": false
