@@ -141,31 +141,31 @@ async def send(event):
     try:
         chat = await event.client.get_entity(chat)
     except (TypeError, ValueError):
-        return await event.edit("**Invalid link provided!**")
+        return await event.edit("**Link inválido fornecido!**")
 
     message = await event.get_reply_message()
 
     await event.client.send_message(entity=chat, message=message)
-    await event.edit(f"**Sent this message to** `{chat.title}`**!**")
+    await event.edit(f"**Mensagem enviada para** `{chat.title}`**!**")
 
 
 @register(outgoing=True, pattern=r"^\.send (.*)")
 async def send(event):
-    await event.edit("**Processing...**")
+    await event.edit("**Processando...**")
 
     if not event.is_reply:
-        return await event.edit("**Reply to a message!**")
+        return await event.edit("**Responda a uma mensagem!**")
 
     chat = event.pattern_match.group(1)
     try:
         chat = await event.client.get_entity(chat)
     except (TypeError, ValueError):
-        return await event.edit("**Invalid link provided!**")
+        return await event.edit("**Link inválido fornecido!**")
 
     message = await event.get_reply_message()
 
     await event.client.send_message(entity=chat, message=message)
-    await event.edit(f"**Sent this message to** `{chat.title}`**!**")
+    await event.edit(f"**Mensagem enviada para** `{chat.title}`**!**")
 
 
 CMD_HELP.update(
@@ -178,12 +178,12 @@ CMD_HELP.update(
         "repo": ">`.repo`" "\n**Uso:** Repositório GitHub deste bot",
         "readme": ">`.readme`"
         "\n**Uso:** Fornece links para configurar o userbot e seus módulos.",
-        "repeat": ">`.repeat <no> <text>`"
+        "repeat": ">`.repeat <número> <text>`"
         "\n**Uso:** Repete o texto várias vezes. Não confunda isso com spam.",
         "restart": ">`.restart`" "\n**Uso:** Reinicia o bot.",
         "raw": ">`.raw`"
         "\n**Uso:** Obtenha dados detalhados em formato JSON sobre a mensagem respondida.",
-        "send": ">`.send <username/id>` (as a reply)"
-        '\nUsage: Forwards the replied message to given chat without the "Forwarded from" tag.',
+        "send": ">`.send <nome de usuário/id>` (como uma resposta)"
+        '\n**Uso**: Encaminha a mensagem respondida para determinado bate-papo sem a tag "Encaminhado".',
     }
 )
