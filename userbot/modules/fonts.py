@@ -177,8 +177,8 @@ async def oldy(event):
 
 CMD_HELP.update(
     {
-        "fonts": ".weebify :- Deixe seu texto igual otaku. \
-\n.circlify :- Faz o texto ficar redondo. \
-\n.oldeng :- Fonte inglesa antiga"
+        "fonts": "**.weebify** : Deixe seu texto igual otaku. \
+\n**.circlify** : Faz o texto ficar redondo. \
+\n**.oldeng** : Fonte inglesa antiga."
     }
 )
