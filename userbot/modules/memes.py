@@ -7,6 +7,7 @@
 from asyncio import sleep
 from random import choice, getrandbits, randint
 from re import sub
+from collections import deque
 
 import requests
 from cowpy import cow
