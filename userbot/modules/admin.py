@@ -525,6 +525,19 @@ async def get_admin(show):
     await show.edit(mentions, parse_mode="html")
 
 
+@register(outgoing=True, pattern="^.all$")
+async def tagaso(event):
+    """ For .all command, mention all of the member in the group chat"""
+    if event.fwd_from:
+        return
+    await event.delete()
+    mentions = "@all"
+    chat = await event.get_input_chat()
+    async for user in bot.iter_participants(chat, 500):
+        mentions += f"[\u2063](tg://user?id={user.id})"
+    await bot.send_message(chat, mentions, reply_to=event.message.reply_to_msg_id)
+
+
 @register(outgoing=True, pattern=r"^\.pin(?: |$)(.*)")
 async def pin(msg):
     """ For .pin command, pins the replied/tagged message on the top the chat. """
