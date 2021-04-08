@@ -190,8 +190,8 @@ async def upstream(event):
             for commit in changelog.splitlines():
                 if commit.startswith("- [NQ]"):
                     return await event.edit(
-                        "**Quick update has been disabled for this update; "
-                        "use** `.update deploy` **instead.**"
+                        "**A atualização rápida foi desativada para esta atualização; "
+                        "use** `.update deploy` **em vez disso.**"
                     )
         await event.edit("**Fazendo uma atualização rápida, por favor aguarde...**")
         await update(event, repo, ups_rem, ac_br)

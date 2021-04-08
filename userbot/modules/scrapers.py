@@ -67,7 +67,7 @@ async def carbon_api(e):
     elif textx:
         pcode = str(textx.message)  # Importing message to module
     code = quote_plus(pcode)  # Converting to urlencoded
-    await e.edit("**Processing...\n25%**")
+    await e.edit("**Processando...\n25%**")
     dl_path = "./.carbon/"
     file_path = dl_path + "carbon.png"
     if os.path.isfile(file_path):
@@ -169,11 +169,11 @@ async def moni(event):
             params={"base": c_from, "symbols": c_to},
         ).json()
     except Exception:
-        await event.edit("**Error: API is down.**")
+        await event.edit("**Erro: API está offline.**")
         return
     if "error" in response:
         await event.edit(
-            "**This seems to be some alien currency, which I can't convert right now.**"
+            "**Esta parece ser uma moeda alienígena, que não posso converter agora.**"
         )
         return
     c_to_val = round(c_from_val * response["rates"][c_to], 2)
