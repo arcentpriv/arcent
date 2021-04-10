@@ -102,9 +102,9 @@ ALIVE_LOGO = os.environ.get("ALIVE_LOGO") or None
 # remove.bg API key
 REM_BG_API_KEY = os.environ.get("REM_BG_API_KEY") or None
 
-# Chrome Driver and Headless Google Chrome Binaries
+# Chrome Driver and Chrome Binaries
 CHROME_DRIVER = "/usr/bin/chromedriver"
-GOOGLE_CHROME_BIN = "/usr/bin/google-chrome"
+CHROME_BIN = "/usr/bin/chromium"
 
 # OpenWeatherMap API Key
 OPEN_WEATHER_MAP_APPID = os.environ.get("OPEN_WEATHER_MAP_APPID") or None
@@ -136,15 +136,18 @@ LASTFM_SECRET = os.environ.get("LASTFM_SECRET") or None
 LASTFM_USERNAME = os.environ.get("LASTFM_USERNAME") or None
 LASTFM_PASSWORD_PLAIN = os.environ.get("LASTFM_PASSWORD") or None
 LASTFM_PASS = md5(LASTFM_PASSWORD_PLAIN)
+
+lastfm = None
 if LASTFM_API and LASTFM_SECRET and LASTFM_USERNAME and LASTFM_PASS:
-    lastfm = LastFMNetwork(
-        api_key=LASTFM_API,
-        api_secret=LASTFM_SECRET,
-        username=LASTFM_USERNAME,
-        password_hash=LASTFM_PASS,
-    )
-else:
-    lastfm = None
+    try:
+        lastfm = LastFMNetwork(
+            api_key=LASTFM_API,
+            api_secret=LASTFM_SECRET,
+            username=LASTFM_USERNAME,
+            password_hash=LASTFM_PASS,
+        )
+    except Exception:
+        pass
 
 # Google Drive Module
 G_DRIVE_DATA = os.environ.get("G_DRIVE_DATA") or None
@@ -180,7 +183,6 @@ if STRING_SESSION:
         api_hash=API_HASH,
         connection=ConnectionTcpAbridged,
         auto_reconnect=True,
-        connection_retries=-1,
     )
 else:
     # pylint: disable=invalid-name
