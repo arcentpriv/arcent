@@ -172,7 +172,7 @@ GENIUS = os.environ.get("GENIUS_ACCESS_TOKEN") or None
 USR_TOKEN = os.environ.get("USR_TOKEN_UPTOBOX") or None
 
 # PurpleBot version
-PURPLEBOT_VERSION = "5.0.1"
+PURPLEBOT_VERSION = "5.0.2"
 
 # 'bot' variable
 if STRING_SESSION:
@@ -183,7 +183,6 @@ if STRING_SESSION:
         api_hash=API_HASH,
         connection=ConnectionTcpAbridged,
         auto_reconnect=True,
-        connection_retries=-1,
     )
 else:
     # pylint: disable=invalid-name
@@ -226,25 +225,28 @@ with bot:
         sys.exit(1)
 
 
-async def send_alive_status():
-    if BOTLOG_CHATID and LOGSPAMMER:
-        DEFAULTUSER = ALIVE_NAME or "Defina a ConfigVar `ALIVE_NAME`!"
-        message = (
+async def update_restart_msg(chat_id, msg_id):
+    DEFAULTUSER = ALIVE_NAME or "Defina a ConfigVar `ALIVE_NAME`!"
+    message = (
             f"👾 **PurpleBot**   ➡️  `{PURPLEBOT_VERSION}` \n"
-            f"⚙️ **Telethon**      ➡️  `{version.__version__}` \n"
-            f"🐍 **Python**         ➡️  `{python_version()}` \n"
+            f"⚙️ **Telethon**     ➡️  `{version.__version__}` \n"
+            f"🐍 **Python**        ➡️  `{python_version()}` \n"
             f"👤 **Usuário**       ➡️   `{DEFAULTUSER}` "
             "\n\n__Userbot iniciado__ ☑️"
         )
-        await bot.send_message(BOTLOG_CHATID, message)
-        return True
+    await bot.edit_message(chat_id, msg_id, message)
+    return True
 
 
-with bot:
-    try:
-        bot.loop.run_until_complete(send_alive_status())
-    except:
-        pass
+if os.path.isfile(".restartmsg"):
+    with open(".restartmsg") as f:
+        chat_id, msg_id = map(int, f)
+    with bot:
+        try:
+            bot.loop.run_until_complete(update_restart_msg(chat_id, msg_id))
+        except:
+            pass
+    os.remove(".restartmsg")
 
 # Global Variables
 COUNT_MSG = 0

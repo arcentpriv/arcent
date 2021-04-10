@@ -13,47 +13,40 @@ from telethon import functions
 
 from userbot import CMD_HELP
 from userbot.events import register
+from userbot.utils import humanbytes
 
 
-@register(outgoing=True, pattern=r"^\.speed$")
-async def speedtst(spd):
+@register(outgoing=True, pattern=r"^\.speedtest$")
+async def speedtst(event):
     """ For .speed command, use SpeedTest to check server speeds. """
-    await spd.edit("`Executando teste de velocidade . . .`")
-    test = Speedtest()
+    await event.edit("**Executando teste de velocidade...**")
 
+    test = Speedtest()
     test.get_best_server()
     test.download()
     test.upload()
     test.results.share()
     result = test.results.dict()
 
-    await spd.edit(
-        "`"
-        "Início em "
-        f"{result['timestamp']} \n\n"
-        "Download "
-        f"{speed_convert(result['download'])} \n"
-        "Upload "
-        f"{speed_convert(result['upload'])} \n"
-        "Ping "
-        f"{result['ping']} \n"
-        "ISP "
-        f"{result['client']['isp']}"
-        "`"
+    msg = (
+        f"**Ping:** `{result['ping']}`\n"
+        f"**Upload:** `{humanbytes(result['upload'])}/s`\n"
+        f"**Download:** `{humanbytes(result['download'])}/s`\n\n"
+        "**Client**\n"
+        f"**Provedora:** `{result['client']['isp']}`\n"
+        f"**País:** `{result['client']['country']}`\n\n"
+        "**Servidor**\n"
+        f"**Nome:** `{result['server']['name']}`\n"
+        f"**País:** `{result['server']['country']}`\n"
+        f"**Patrocinador:** `{result['server']['sponsor']}`\n\n"
     )
 
-
-def speed_convert(size):
-    """
-    Hi human, you can't read bytes?
-    """
-    power = 2 ** 10
-    zero = 0
-    units = {0: "", 1: "Kb/s", 2: "Mb/s", 3: "Gb/s", 4: "Tb/s"}
-    while size > power:
-        size /= power
-        zero += 1
-    return f"{round(size, 2)} {units[zero]}"
+    await event.client.send_file(
+        event.chat_id,
+        result["share"],
+        caption=msg,
+    )
+    await event.delete()
 
 
 @register(outgoing=True, pattern=r"^\.dc$")
@@ -79,7 +72,7 @@ async def pingme(event):
 
 CMD_HELP.update(
     {
-        "speed": ">`.speed`" "\n**Uso:** Faz um teste de velocidade e mostra os resultados.",
+        "speedtest": ">`.speedtest`" "\n**Uso:** Faz um teste de velocidade e mostra os resultados.",
         "dc": ">`.dc`" "\n**Uso:** Encontra o datacenter mais próximo de seu servidor.",
         "ping": ">`.ping`" "\n**Uso:** Mostra quanto tempo leva para pingar seu bot.",
     }

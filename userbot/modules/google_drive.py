@@ -171,14 +171,12 @@ async def create_app(gdrive):
         creds = pickle.loads(base64.b64decode(creds.encode()))
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            await gdrive.edit("**Atualizando credenciais...**")
             # Refresh credentials
             creds.refresh(Request())
             helper.save_credentials(
                 str(gdrive.sender_id), base64.b64encode(pickle.dumps(creds)).decode()
             )
         else:
-            await gdrive.edit("**Credenciais não encontradas, gere-as.**")
             return False
     return build("drive", "v3", credentials=creds, cache_discovery=False)
 
@@ -266,7 +264,6 @@ async def download(gdrive, service, uri=None):
     try:
         file_name = await get_raw_name(required_file_name)
     except AttributeError:
-        reply = "**Erro: arquivo inválido.**"
         return reply
     mimeType = await get_mimeType(required_file_name)
     try:
