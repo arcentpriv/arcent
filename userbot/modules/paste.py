@@ -10,30 +10,30 @@ from userbot.events import register
 @register(outgoing=True, pattern=r"^\.paste(?:\s|$)([\s\S]*)")
 async def paste(event):
     """Pastes given text to Katb.in"""
-    await event.edit("**Processing...**")
+    await event.edit("**Processando...**")
 
     if event.is_reply:
         reply = await event.get_reply_message()
         if reply.media and not isinstance(reply.media, MessageMediaWebPage):
-            return await event.edit("**Reply to some text!**")
+            return await event.edit("**Responda a algum texto!**")
         message = reply.message
 
     elif event.pattern_match.group(1).strip():
         message = event.pattern_match.group(1).strip()
 
     else:
-        return await event.edit("**Read** `.help paste`**.**")
+        return await event.edit("**Veja** `.help paste`**.**")
 
     response = post("https://api.katb.in/api/paste", json={"content": message}).json()
 
-    if response["msg"] == "Successfully created paste":
+    if response["msg"] == "Mensagem copiada com sucesso":
         await event.edit(
-            f"**Pasted successfully:** [Katb.in](https://katb.in/{response['paste_id']})\n"
+            f"**Colagem:** [Katb.in](https://katb.in/{response['paste_id']})\n"
         )
     else:
-        await event.edit("**Katb.in seems to be down.**")
+        await event.edit("**Katb.in parece esta indisponível.**")
 
 
 CMD_HELP.update(
-    {"paste": ">`.paste` <text/reply>" "\nUsage: Pastes given text to Katb.in."}
+    {"paste": ">`.paste` <texto/resposta>" "\n**Uso:** Cola o texto dado no Katb.in."}
 )
