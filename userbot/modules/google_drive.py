@@ -72,7 +72,7 @@ REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
 __ = G_DRIVE_FOLDER_ID
 if __ is not None:
     if "uc?id=" in G_DRIVE_FOLDER_ID:
-        LOGS.info("G_DRIVE_FOLDER_ID não é uma pasta válida/URL...")
+        LOGS.info("G_DRIVE_FOLDER_ID não é um URL de pasta válido...")
         G_DRIVE_FOLDER_ID = None
     try:
         G_DRIVE_FOLDER_ID = __.split("folders/")[1]
@@ -118,7 +118,7 @@ async def generate_credentials(gdrive):
         try:
             configs = json.loads(G_DRIVE_DATA)
         except json.JSONDecodeError:
-            await gdrive.edit("**Erro:** `G_DRIVE_DATA` **elemento inválido!**")
+            await gdrive.edit("**Erro:** `G_DRIVE_DATA` **elemento não é válido!**")
             return False
     else:
         # Only for old user
@@ -140,10 +140,10 @@ async def generate_credentials(gdrive):
         configs, SCOPES, redirect_uri=REDIRECT_URI
     )
     auth_url, _ = flow.authorization_url(access_type="offline", prompt="consent")
-    msg = await gdrive.respond("**Vá para o seu grupo BOTLOG para autenticar o token.**")
+    msg = await gdrive.respond("**Vá para seu grupo de LOGS do bot para autenticar o token.**")
     async with gdrive.client.conversation(BOTLOG_CHATID) as conv:
         url_msg = await conv.send_message(
-            "**Por favor, vá para este URL:**\n"
+            "**Please go to this URL:**\n"
             f"{auth_url}\n"
             "**Autorize e envie o código em resposta a esta mensagem.**"
         )
@@ -171,12 +171,14 @@ async def create_app(gdrive):
         creds = pickle.loads(base64.b64decode(creds.encode()))
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
+            await gdrive.edit("**Atualizando credenciais...**")
             # Refresh credentials
             creds.refresh(Request())
             helper.save_credentials(
                 str(gdrive.sender_id), base64.b64encode(pickle.dumps(creds)).decode()
             )
         else:
+            await gdrive.edit("**Credenciais não encontradas, crie-as.**")
             return False
     return build("drive", "v3", credentials=creds, cache_discovery=False)
 
@@ -264,6 +266,7 @@ async def download(gdrive, service, uri=None):
     try:
         file_name = await get_raw_name(required_file_name)
     except AttributeError:
+        reply = "**Erro: Arquivo inválido.**"
         return reply
     mimeType = await get_mimeType(required_file_name)
     try:
@@ -273,10 +276,10 @@ async def download(gdrive, service, uri=None):
                     gdrive, service, required_file_name, file_name, mimeType
                 )
             except CancelProcess:
-                reply = "**GDrive - Upload de arquivo**\n\n" "**Status:** Cancelado."
+                reply = "**GDrive - Envio de arquivo**\n\n" "**Status:** Cancelado."
                 return reply
             else:
-                reply = f"**GDrive - Upload de arquivo**\n\n[{file_name}]({result[1]})"
+                reply = f"**GDrive - Envio de arquivo**\n\n[{file_name}]({result[1]})"
                 reply += f"\n**Tamanho:** {humanbytes(result[0])}"
                 if G_DRIVE_INDEX_URL:
                     index_url = G_DRIVE_INDEX_URL.rstrip("/") + "/" + quote(file_name)
@@ -290,14 +293,14 @@ async def download(gdrive, service, uri=None):
             try:
                 await task_directory(gdrive, service, required_file_name)
             except CancelProcess:
-                reply = "**GDrive - Upload de pasta**\n\n" "**Status:** Cancelado."
+                reply = "**GDrive - Pasta de Upload**\n\n" "**Status:** Cancelado."
                 await reset_parentId()
                 return reply
             except Exception:
                 await reset_parentId()
             else:
                 folder_size = await count_dir_size(service, parent_Id)
-                reply = f"**GDrive - Upload de pasta**\n\n[{file_name}]({webViewURL})"
+                reply = f"**GDrive - Pasta de Upload**\n\n[{file_name}]({webViewURL})"
                 reply += f"\n**Tamanho:** {humanbytes(folder_size)}"
                 if G_DRIVE_INDEX_URL:
                     index_url = (
@@ -483,10 +486,10 @@ async def download_gdrive(gdrive, service, uri):
         "**GDrive - Download**\n\n"
         f"**Nome:** `{file_name}`\n"
         f"**Tamanho:** `{humanbytes(file_size)}`\n"
-        f"**Local:** `{file_path}`\n"
-        "**Status:** Download com sucesso."
+        f"**Caminho:** `{file_path}`\n"
+        "**Status:** Download realizado com sucesso."
     )
-    msg = await gdrive.respond("**Responda à pergunta em seu grupo do BOTLOG.**")
+    msg = await gdrive.respond("**Responda a pergunta em seu grupo do BOTLOG.**")
     async with gdrive.client.conversation(BOTLOG_CHATID) as conv:
         ask = await conv.send_message("**Prosseguir com o espelhamento? [S/N]**")
         try:
@@ -512,10 +515,10 @@ async def download_gdrive(gdrive, service, uri):
                 f"**Nome:** `{file_name}`\n"
                 f"**Tamanho:** `{humanbytes(result[0])}`\n"
                 f"**Link:** [{file_name}]({result[1]})\n"
-                "**Status:** Enviado com sucesso."
+                "**Status:** Carregado com sucesso."
             )
         return reply
-    await gdrive.client.send_message(BOTLOG_CHATID, "**Erro: escolha inválida.**")
+    await gdrive.client.send_message(BOTLOG_CHATID, "**Erro: Escolha inválida.**")
     return None
 
 
@@ -525,8 +528,8 @@ async def change_permission(service, Id):
         service.permissions().create(fileId=Id, body=permission).execute()
     except HttpError as e:
         # it's not possible to change permission per file for teamdrive
-        if f'"Arquivo não encontrado: {Id}."' in str(e) or (
-            '"O compartilhamento de pastas dentro de um drive compartilhado não é compatível."'
+        if f'"File not found: {Id}."' in str(e) or (
+            '"Sharing folders that are inside a shared drive is not supported."'
             in str(e)
         ):
             return
@@ -689,7 +692,7 @@ async def lists(gdrive):
     if checker is not None:
         page_size = int(gdrive.pattern_match.group(1).strip("-l "))
         if page_size > 1000:
-            await gdrive.edit("**Erro: a lista excede o limite máximo.**")
+            await gdrive.edit("**Erro: A lista excede o limite máximo.**")
             return
     else:
         page_size = 25  # default page_size is 25
@@ -912,7 +915,7 @@ async def google_drive_managers(gdrive):
                 status = "**Pasta existe.**"
             else:
                 status = "**o arquivo existe.**"
-            reply = "**GDrive**\n\n" f"**Nome**: `{name_or_id}`\n" f"**ID:** `{f_id}`\n"
+            reply = "**GDrive**\n\n" f"**Name**: `{name_or_id}`\n" f"**ID:** `{f_id}`\n"
             if mimeType != "application/vnd.google-apps.folder":
                 reply += f"**Tamanho:** `{humanbytes(f_size)}`\n"
                 reply += f"**Link:** [{name_or_id}]({downloadURL})\n\n"
@@ -951,7 +954,7 @@ async def google_drive(gdrive):
         return None
     if value and gdrive.reply_to_msg_id:
         await gdrive.edit(
-            "**Erro: É para fazer o upload do arquivo ou a mensagem/mídia respondida?**"
+            "**Erro: É para fazer upload do arquivo ou da mensagem/mídia respondida?**"
         )
         return None
     service = await create_app(gdrive)
@@ -973,7 +976,7 @@ async def google_drive(gdrive):
             await task_directory(gdrive, service, folder_path)
         except CancelProcess:
             await gdrive.respond(
-                "**GDrive - Upload de pasta**\n\n" "**Status:** Cancelado."
+                "**GDrive - Pasta de Upload**\n\n" "**Status:** Cancelado."
             )
             await reset_parentId()
             await gdrive.delete()
@@ -984,13 +987,13 @@ async def google_drive(gdrive):
             return False
         else:
             folder_size = await count_dir_size(service, parent_Id)
-            msg = f"**GDrive - Upload de pasta**\n\n[{folder_name}]({webViewURL})"
+            msg = f"**GDrive - Pasta de Upload**\n\n[{folder_name}]({webViewURL})"
             msg += f"\n**Tamanho:** {humanbytes(folder_size)}"
             if G_DRIVE_INDEX_URL:
                 index_url = (
                     G_DRIVE_INDEX_URL.rstrip("/") + "/" + quote(folder_name) + "/"
                 )
-                msg += f"\n[URL da índice]({index_url})"
+                msg += f"\n[URL de índice]({index_url})"
             await gdrive.edit(msg, link_preview=False)
             await reset_parentId()
             return True
@@ -1007,7 +1010,7 @@ async def google_drive(gdrive):
                 try:
                     reply = await download_gdrive(gdrive, service, uri)
                 except CancelProcess:
-                    reply = "**GDrive - Baixar arquivo**\n\n" "**Status:** Cancelado."
+                    reply = "**GDrive - Download de arquivo**\n\n" "**Status:** Cancelado."
                     break
                 except Exception as e:
                     reply = f"**Erro:** `{str(e)}`"
@@ -1027,7 +1030,7 @@ async def google_drive(gdrive):
                     try:
                         reply = await download_gdrive(gdrive, service, fileId)
                     except CancelProcess:
-                        reply = "**GDrive - Baixar arquivo**\n\n**Status:** Cancelado."
+                        reply = "**GDrive - Download de arquivo**\n\n**Status:** Cancelado."
                         break
                     except Exception as e:
                         reply = f"**Erro:** `{str(e)}`"
@@ -1040,8 +1043,8 @@ async def google_drive(gdrive):
         if not uri and not gdrive.reply_to_msg_id:
             await gdrive.edit(
                 "**Erro:** URL/caminho inválido.\n"
-                "Se você acha que isso está errado, talvez você tenha usado .gd com múltiplos "
-                "caminhos - ex: `.gd <nomedoarquivo1> <nomedoarquivo2>` que não é suportado."
+                "Se você acha que isso está errado, talvez você tenha usado .gd com vários "
+                "caminhos e.g `.gd <nome do arquivo1> <nome do arquivo2>` o qual, não é suportado."
             )
             return False
     if uri and not gdrive.reply_to_msg_id:
@@ -1050,7 +1053,7 @@ async def google_drive(gdrive):
                 reply = await download(gdrive, service, dl)
             except Exception as e:
                 if " not found" in str(e) or "'file'" in str(e):
-                    reply = "**GDrive - Baixar arquivo**\n\n" "**Status:** Cancelado."
+                    reply = "**GDrive - Download de arquivo**\n\n" "**Status:** Cancelado."
                     await asyncio.sleep(2.5)
                     break
                 # if something bad happened, continue to next uri
@@ -1064,9 +1067,9 @@ async def google_drive(gdrive):
     try:
         result = await upload(gdrive, service, file_path, file_name, mimeType)
     except CancelProcess:
-        gdrive.respond("**GDrive - Upload de arquivo**\n\n**Status:** Cancelado.")
+        gdrive.respond("**GDrive - Envio de arquivo**\n\n**Status:** Cancelado.")
     if result:
-        msg = f"**GDrive - Upload de arquivo**\n\n[{file_name}]({result[1]})"
+        msg = f"**GDrive - Envio de arquivo**\n\n[{file_name}]({result[1]})"
         msg += f"\n**Tamanho:** {humanbytes(result[0])}__"
         if G_DRIVE_INDEX_URL:
             index_url = G_DRIVE_INDEX_URL.rstrip("/") + "/" + quote(file_name)
@@ -1090,14 +1093,14 @@ async def set_upload_folder(gdrive):
         try:
             del parent_Id
         except NameError:
-            await gdrive.edit("**Erro: ID da raíz não configurado.**")
+            await gdrive.edit("**Erro: ID da pasta não especificado.**")
             return False
         else:
-            await gdrive.edit("**Será usado o diretório padrão.**")
+            await gdrive.edit("**O diretório raiz será usado.**")
             return None
     inp = gdrive.pattern_match.group(2)
     if not inp:
-        await gdrive.edit(">`.gdfset put <pastaURL/pastaID>`")
+        await gdrive.edit(">`.gdfset put <URL da pasta/ID da pasta>`")
         return None
     # Value for .gdfset (put|rm) can be folderId or folder link
     try:
@@ -1110,7 +1113,7 @@ async def set_upload_folder(gdrive):
             parent_Id = inp
             await gdrive.edit("**Alterado com sucesso.**")
             return None
-        await gdrive.edit("**Alterando a força...**")
+        await gdrive.edit("**Alterado à força...**")
         parent_Id = inp
     else:
         if "uc?id=" in ext_id:
@@ -1165,7 +1168,7 @@ async def check_progress_for_dl(gdrive, gid, previous):
                     f"`{file.name}`\n"
                     f"**Status:** {file.status.capitalize()}\n"
                     f"{prog_str}\n"
-                    f"{humanbytes(downloaded)} de"
+                    f"{humanbytes(downloaded)} of"
                     f" {file.total_length_string()}"
                     f" @ {file.download_speed_string()}\n"
                     f"**Tempo estimado:** {file.eta_string()}"
