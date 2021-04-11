@@ -18,22 +18,19 @@ from userbot.events import register
 @register(outgoing=True, pattern=r"^\.eval(?: |$|\n)([\s\S]*)")
 async def evaluate(event):
     """For .eval command, evaluates the given Python expression."""
-    if event.is_channel and not event.is_group:
-        return await event.edit("**O eval não é permitida em canais.**")
-
-    if event.pattern_match.group(1):
-        expression = event.pattern_match.group(1)
-    else:
-        return await event.edit("**Dê uma expressão para eval.**")
+    expression = event.pattern_match.group(1)
+    if not expression:
+        return await event.edit("**Dê uma expressão para o comando eval.**")
 
     if expression in ("userbot.session", "config.env"):
         return await event.edit("**É uma operação perigosa! Não é permitido!**")
 
+    await event.edit("**Processing...**")
     old_stderr = sys.stderr
     old_stdout = sys.stdout
     redirected_output = sys.stdout = StringIO()
     redirected_error = sys.stderr = StringIO()
-    stdout, stderr, exc = None, None, None
+    stdout, stderr, exc, returned = None, None, None, None
 
     async def aexec(code, event):
         head = "async def __aexec(event):\n "
@@ -50,7 +47,7 @@ async def evaluate(event):
     stderr = redirected_error.getvalue().strip()
     sys.stdout = old_stdout
     sys.stderr = old_stderr
-    evaluation = exc or stderr or stdout or returned
+    evaluation = str(exc or stderr or stdout or returned)
 
     expression.encode("unicode-escape").decode().replace("\\\\", "\\")
     evaluation.encode("unicode-escape").decode().replace("\\\\", "\\")
@@ -83,16 +80,13 @@ async def evaluate(event):
 async def run(event):
     """For .exec command, which executes the dynamically created program"""
     code = event.pattern_match.group(1)
-
-    if event.is_channel and not event.is_group:
-        return await event.edit("**Exec não é permitido em canais!**")
-
     if not code:
         return await event.edit("**Veja** `.help exec` **para exemplos.**")
 
     if code in ("userbot.session", "config.env"):
         return await event.edit("**É uma operação perigosa! Não é permitido!**")
 
+    await event.edit("**Processing...**")
     if len(code.splitlines()) <= 5:
         codepre = code
     else:
@@ -110,15 +104,15 @@ async def run(event):
         stderr=asyncio.subprocess.STDOUT,
     )
     stdout, _ = await process.communicate()
-    result = str(stdout.decode().strip())
+    stdout = str(stdout)
 
     codepre.encode("unicode-escape").decode().replace("\\\\", "\\")
-    result.encode("unicode-escape").decode().replace("\\\\", "\\")
+    stdout.encode("unicode-escape").decode().replace("\\\\", "\\")
 
-    if result:
-        if len(result) > 4096:
+    if stdout:
+        if len(stdout) > 4096:
             with open("output.txt", "w+") as file:
-                file.write(result)
+                file.write(stdout)
             await event.client.send_file(
                 event.chat_id,
                 "output.txt",
@@ -126,7 +120,7 @@ async def run(event):
                 caption="**Resultado muito grande, enviando como arquivo...**",
             )
             return remove("output.txt")
-        await event.edit(f"**Busca:**\n`{codepre}`\n\n**Resultado:**\n`{result}`")
+        await event.edit(f"**Consulta:**\n`{codepre}`\n\n**Resultado:**\n`{stdout}`")
     else:
         await event.edit(
             f"**Busca:**\n`{codepre}`\n\n**Resultado:**\n`Nenhum resultado obtido/Falso`"
@@ -138,27 +132,25 @@ async def terminal_runner(event):
     """For .term command, runs bash commands and scripts on your server."""
     command = event.pattern_match.group(1)
 
-    if event.is_channel and not event.is_group:
-        return await event.edit("**Comandos de terminal não são permitidos em canais!**")
-
     if not command:
         return await event.edit("**Dê um comando ou use .help term para exemplos.**")
 
     if command in ("userbot.session", "config.env"):
         return await event.edit("**É uma operação perigosa! Não é permitido!**")
 
+    await event.edit("**Processing...**")
     process = await asyncio.create_subprocess_shell(
         command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT
     )
     stdout, _ = await process.communicate()
-    result = str(stdout.decode().strip())
+    stdout = str(stdout)
 
     command.encode("unicode-escape").decode().replace("\\\\", "\\")
-    output = result.encode("unicode-escape").decode().replace("\\\\", "\\")
+    stdout.encode("unicode-escape").decode().replace("\\\\", "\\")
 
-    if len(result) > 4096:
+    if len(stdout) > 4096:
         with open("output.txt", "w+") as output:
-            output.write(result)
+            output.write(stdout)
         await event.client.send_file(
             event.chat_id,
             "output.txt",
@@ -167,7 +159,7 @@ async def terminal_runner(event):
         )
         return remove("output.txt")
 
-    await event.edit(f"**Comando:**\n`{command}`\n\n**Resultado:**\n`{result}`")
+    await event.edit(f"**Comando:**\n`{command}`\n\n**Resultado:**\n`{stdout}`")
 
 
 CMD_HELP.update(
