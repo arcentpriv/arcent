@@ -133,7 +133,7 @@ async def raw(event):
 
 @register(outgoing=True, pattern=r"^\.send (.*)")
 async def send(event):
-    await event.edit("**Processing...**")
+    await event.edit("**Processando...**")
 
     if not event.is_reply:
         return await event.edit("**Reply to a message!**")

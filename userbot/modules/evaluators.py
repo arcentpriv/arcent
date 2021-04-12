@@ -25,7 +25,7 @@ async def evaluate(event):
     if expression in ("userbot.session", "config.env"):
         return await event.edit("**É uma operação perigosa! Não é permitido!**")
 
-    await event.edit("**Processing...**")
+    await event.edit("**Processando...**")
     old_stderr = sys.stderr
     old_stdout = sys.stdout
     redirected_output = sys.stdout = StringIO()
@@ -86,7 +86,7 @@ async def run(event):
     if code in ("userbot.session", "config.env"):
         return await event.edit("**É uma operação perigosa! Não é permitido!**")
 
-    await event.edit("**Processing...**")
+    await event.edit("**Processando...**")
     if len(code.splitlines()) <= 5:
         codepre = code
     else:
@@ -138,7 +138,7 @@ async def terminal_runner(event):
     if command in ("userbot.session", "config.env"):
         return await event.edit("**É uma operação perigosa! Não é permitido!**")
 
-    await event.edit("**Processing...**")
+    await event.edit("**Processando...**")
     process = await asyncio.create_subprocess_shell(
         command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT
     )
