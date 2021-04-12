@@ -74,14 +74,14 @@ BOTLOG = sb(os.environ.get("BOTLOG") or "False")
 LOGSPAMMER = sb(os.environ.get("LOGSPAMMER") or "False")
 
 # Bleep Blop, this is a bot ;)
-PM_AUTO_BAN = sb(os.environ.get("PM_AUTO_BAN") or "False")
+PM_AUTO_BAN = sb(os.environ.get("PM_AUTO_BAN") or "True")
 
 # Heroku Credentials for updater.
 HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME") or None
 HEROKU_API_KEY = os.environ.get("HEROKU_API_KEY") or None
 
 # Custom (forked) repo URL and BRANCH for updater.
-UPSTREAM_REPO_URL = "https://github.com/thewhiteharlot/PurpleBotKEN.git"
+UPSTREAM_REPO_URL = "https://github.com/thewhiteharlot/PurpleBot.git"
 UPSTREAM_REPO_BRANCH = "master"
 
 # Console verbose logging
