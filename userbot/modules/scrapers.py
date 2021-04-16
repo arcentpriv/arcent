@@ -545,6 +545,43 @@ async def lang(value):
         )
 
 
+@register(outgoing=True, pattern="^.sg(?: |$)(.*)")
+async def lastname(steal):
+    if steal.fwd_from:
+        return
+    if not steal.reply_to_msg_id:
+        await steal.edit("**Responda a qualquer mensagem do usuário.**")
+        return
+    message = await steal.get_reply_message()
+    chat = "@SangMataInfo_bot"
+    user_id = message.sender.id
+    id = f"/search_id {user_id}"
+    if message.sender.bot:
+        await steal.edit("**Responda a mensagem de usuários reais.**")
+        return
+    await steal.edit("**Espere enquanto eu roubo alguns dados da NASA**")
+    async with bot.conversation(chat) as conv:
+        try:
+            msg = await conv.send_message(id)
+            r = await conv.get_response()
+            response = await conv.get_response()
+        except YouBlockedUserError:
+            await steal.reply("**Desbloqueie @sangmatainfo_bot e tente novamente**")
+            return
+        if response.text.startswith("No records"):
+            await steal.edit("**Nenhum registro encontrado para este usuário**")
+            await steal.client.delete_messages(
+                conv.chat_id, [msg.id, r.id, response.id]
+            )
+            return
+        else:
+            respond = await conv.get_response()
+            await steal.edit(f"{response.message}")
+        await steal.client.delete_messages(
+            conv.chat_id, [msg.id, r.id, response.id, respond.id]
+        )
+
+
 @register(outgoing=True, pattern=r"^\.yt(?: |$)(\d*)? ?(.*)")
 async def yt_search(event):
     """ For .yt command, do a YouTube search from Telegram. """
