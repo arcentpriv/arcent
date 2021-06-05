@@ -71,6 +71,13 @@ async def deploy(event, repo, ups_rem, ac_br, txt):
                 f"{txt}\n" "**Credenciais do Heroku inválidas para atualizar os dynos do userbot.**"
             )
             return repo.__del__()
+        try:
+            from userbot.modules.sql_helper.globals import addgvar, delgvar
+
+            delgvar("restartstatus")
+            addgvar("restartstatus", f"{event.chat_id}\n{event.id}")
+        except AttributeError:
+            pass
         ups_rem.fetch(ac_br)
         repo.git.reset("--hard", "FETCH_HEAD")
         heroku_git_url = heroku_app.git_url.replace(
@@ -86,7 +93,7 @@ async def deploy(event, repo, ups_rem, ac_br, txt):
         except Exception as error:
             await event.edit(f"{txt}\nHere is the error log:\n`{error}`")
             return repo.__del__()
-        build = app.builds(order_by="created_at", sort="desc")[0]
+        build = heroku_app.builds(order_by="created_at", sort="desc")[0]
         if build.status == "failed":
             await event.edit("**Erro na atualização!**\nCancelada ou ocorreram alguns erros.`")
             await asyncio.sleep(5)
@@ -95,9 +102,6 @@ async def deploy(event, repo, ups_rem, ac_br, txt):
             "**Atualizado com sucesso!**\nO bot está reiniciando, estará de volta em alguns segundos."
         )
 
-        with open(".restartmsg", "w") as f:
-            f.truncate(0)
-            f.write(f"{event.chat_id}\n{event.id}\n")
     else:
         await event.edit("**Por favor configure a variável** `HEROKU_API_KEY` ")
     return
@@ -112,9 +116,13 @@ async def update(event, repo, ups_rem, ac_br):
         "**Atualizado com sucesso!**\nO bot está reiniciando, estará de volta em alguns segundos."
     )
 
-    with open(".restartmsg", "w") as f:
-        f.truncate(0)
-        f.write(f"{event.chat_id}\n{event.id}\n")
+    try:
+        from userbot.modules.sql_helper.globals import addgvar, delgvar
+
+        delgvar("restartstatus")
+        addgvar("restartstatus", f"{event.chat_id}\n{event.id}")
+    except AttributeError:
+        pass
 
     # Spin a new instance of bot
     args = [sys.executable, "-m", "userbot"]
@@ -195,9 +203,9 @@ async def upstream(event):
         )
 
     if conf == "now":
-        if changelog != "":
-            for commit in changelog.splitlines():
-                if commit.startswith("- [NQ]"):
+        for commit in changelog.splitlines():
+            if commit.startswith("- [NQ]"):
+                if HEROKU_APP_NAME is not None and HEROKU_API_KEY is not None:
                     return await event.edit(
                         "**A atualização rápida foi desativada para esta atualização; "
                         "use** `.update deploy` **em vez disso.**"

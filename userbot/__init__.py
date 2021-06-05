@@ -11,6 +11,7 @@ from distutils.util import strtobool as sb
 from logging import DEBUG, INFO, basicConfig, getLogger
 from pathlib import Path
 from platform import python_version
+from time import sleep
 
 from dotenv import load_dotenv
 from pylast import LastFMNetwork, md5
@@ -174,6 +175,40 @@ USR_TOKEN = os.environ.get("USR_TOKEN_UPTOBOX") or None
 # PurpleBot version
 PURPLEBOT_VERSION = "5.0.2"
 
+
+def migration_workaround():
+    try:
+        from userbot.modules.sql_helper.globals import addgvar, delgvar, gvarstatus
+    except:
+        return None
+
+    old_ip = gvarstatus("public_ip")
+    new_ip = get("https://api.ipify.org").text
+
+    if old_ip is None:
+        delgvar("public_ip")
+        addgvar("public_ip", new_ip)
+        return None
+
+    if old_ip == new_ip:
+        return None
+
+    sleep_time = 180
+    LOGS.info(
+        f"Uma mudança no endereço IP foi detectada, esperando por {sleep_time / 60} minutos antes de iniciar o bot."
+    )
+    sleep(sleep_time)
+    LOGS.info("Inicializando o bot...")
+
+    delgvar("public_ip")
+    addgvar("public_ip", new_ip)
+    return None
+
+
+if HEROKU_APP_NAME is not None and HEROKU_API_KEY is not None:
+    migration_workaround()
+
+
 # 'bot' variable
 if STRING_SESSION:
     # pylint: disable=invalid-name
@@ -238,15 +273,18 @@ async def update_restart_msg(chat_id, msg_id):
     return True
 
 
-if os.path.isfile(".restartmsg"):
-    with open(".restartmsg") as f:
-        chat_id, msg_id = map(int, f)
+try:
+    from userbot.modules.sql_helper.globals import delgvar, gvarstatus
+
+    chat_id, msg_id = gvarstatus("restartstatus").split("\n")
     with bot:
         try:
-            bot.loop.run_until_complete(update_restart_msg(chat_id, msg_id))
+            bot.loop.run_until_complete(update_restart_msg(int(chat_id), int(msg_id)))
         except:
             pass
-    os.remove(".restartmsg")
+    delgvar("restartstatus")
+except AttributeError:
+    pass
 
 # Global Variables
 COUNT_MSG = 0
