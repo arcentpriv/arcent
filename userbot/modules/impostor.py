@@ -37,7 +37,6 @@ async def impostor(event):
         return await event.edit(
             "**Use** `.help impersonate` **para aprender como usá-lo.**"
         )
-
     if not STORAGE.userObj:
         STORAGE.userObj = await event.client(GetFullUserRequest(event.sender_id))
 

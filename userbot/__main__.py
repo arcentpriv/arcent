@@ -35,7 +35,4 @@ LOGS.info(
     "Se precisar de ajuda, mande uma mensagem para @Kircheiss (cuidado, ela morde)"
 )
 
-if len(sys.argv) not in (1, 3, 4):
-    bot.disconnect()
-else:
-    bot.run_until_disconnected()
+bot.run_until_disconnected()

@@ -6,10 +6,10 @@
 """ Userbot module for managing events.
  One of the main components of the userbot. """
 
-import sys
 from asyncio import create_subprocess_shell as asyncsubshell
 from asyncio import subprocess as asyncsub
 from os import remove
+from sys import exc_info
 from time import gmtime, strftime
 from traceback import format_exc
 
@@ -24,10 +24,7 @@ def register(**args):
     disable_edited = args.get("disable_edited", False)
     ignore_unsafe = args.get("ignore_unsafe", False)
     unsafe_pattern = r"^[^/!#@\$A-Za-z]"
-    groups_only = args.get("groups_only", False)
-    trigger_on_fwd = args.get("trigger_on_fwd", False)
     disable_errors = args.get("disable_errors", False)
-    insecure = args.get("insecure", False)
 
     if pattern is not None and not pattern.startswith("(?i)"):
         args["pattern"] = "(?i)" + pattern
@@ -38,17 +35,8 @@ def register(**args):
     if "ignore_unsafe" in args:
         del args["ignore_unsafe"]
 
-    if "groups_only" in args:
-        del args["groups_only"]
-
     if "disable_errors" in args:
         del args["disable_errors"]
-
-    if "trigger_on_fwd" in args:
-        del args["trigger_on_fwd"]
-
-    if "insecure" in args:
-        del args["insecure"]
 
     if pattern and not ignore_unsafe:
         args["pattern"] = pattern.replace("^.", unsafe_pattern, 1)
@@ -60,13 +48,6 @@ def register(**args):
                 # Ignore edits that take place in channels.
                 return
 
-            if not trigger_on_fwd and check.fwd_from:
-                return
-
-            if groups_only and not check.is_group:
-                await check.respond("`Eu não acho que isso seja um grupo.`")
-                return
-
             try:
                 from userbot.modules.sql_helper.blacklist_sql import get_blacklist
 
@@ -76,16 +57,14 @@ def register(**args):
             except Exception:
                 pass
 
-            if check.via_bot_id and not insecure and check.out:
+            if check.via_bot_id and check.out:
                 return
 
             try:
                 await func(check)
-
             # Thanks to @kandnub for this HACK.
             # Raise StopPropagation to Raise StopPropagation
             # This needed for AFK to working properly
-
             except events.StopPropagation:
                 raise events.StopPropagation
             # This is a gay exception and must be passed out. So that it doesnt
@@ -93,7 +72,6 @@ def register(**args):
             except KeyboardInterrupt:
                 pass
             except BaseException as e:
-
                 # Check if we have to disable error logging.
                 if not disable_errors:
                     LOGS.exception(e)  # Log the error in console
@@ -123,18 +101,15 @@ def register(**args):
                     ftext += "\n\nTexto de erro:\n"
                     ftext += str(sys.exc_info()[1])
                     ftext += "\n\n--------FIM DO RELATÓRIO--------"
+                    )
 
                     command = 'git log --pretty=format:"%an: %s" -10'
 
-                    ftext += "\n\n\nÚltimos 10 commits:\n"
 
                     process = await asyncsubshell(
                         command, stdout=asyncsub.PIPE, stderr=asyncsub.PIPE
                     )
                     stdout, stderr = await process.communicate()
-                    result = str(stdout.decode().strip()) + str(stderr.decode().strip())
-
-                    ftext += result
 
                     with open("error.log", "w+") as file:
                         file.write(ftext)

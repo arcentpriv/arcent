@@ -5,8 +5,19 @@ from sqlalchemy.exc import IntegrityError
 from userbot import CMD_HELP, bot
 from userbot.events import register
 
+fban_replies = [
+    "New FedBan",
+    "Starting a federation ban",
+    "Start a federation ban",
+    "FedBan Reason update",
+    "FedBan reason updated",
+    "has already been fbanned, with the exact same reason.",
+]
 
-@register(outgoing=True, disable_edited=True, pattern=r"^\.fban(?: |$)(.*)")
+unfban_replies = ["New un-FedBan", "I'll give", "Un-FedBan"]
+
+
+@register(outgoing=True, disable_edited=True, pattern=r"^\.(d)?fban(?: |$)(.*)")
 async def fban(event):
     """Bans a user from connected federations."""
     try:
@@ -14,18 +25,24 @@ async def fban(event):
     except IntegrityError:
         return await event.edit("**Executando em modo não SQL!**")
 
+    match = event.pattern_match.group(2)
+
     if event.is_reply:
         reply_msg = await event.get_reply_message()
         fban_id = reply_msg.sender_id
-        reason = event.pattern_match.group(1)
+
+        if event.pattern_match.group(1) == "d":
+            await reply_msg.delete()
+
+        reason = match
     else:
-        pattern = str(event.pattern_match.group(1)).split()
+        pattern = match.split()
         fban_id = pattern[0]
         reason = " ".join(pattern[1:])
 
     try:
         fban_id = await event.client.get_peer_id(fban_id)
-    except:
+    except Exception:
         pass
 
     if event.sender_id == fban_id:
@@ -33,14 +50,14 @@ async def fban(event):
             "**Erro: Esta ação foi impedida pelos protocolos de autopreservação.**"
         )
 
-    if len(fed_list := get_flist()) == 0:
+    fed_list = get_flist()
+    if len(fed_list) == 0:
         return await event.edit("**Você ainda não se conectou a nenhuma federação!**")
-
     user_link = f"[{fban_id}](tg://user?id={fban_id})"
 
     await event.edit(f"**Fbanindo** {user_link}...")
     failed = []
-    total = int(0)
+    total = 0
 
     for i in fed_list:
         total += 1
@@ -53,14 +70,9 @@ async def fban(event):
                     conv.chat_id, message=reply, clear_mentions=True
                 )
 
-                if (
-                    ("New FedBan" not in reply.text)
-                    and ("Starting a federation ban" not in reply.text)
-                    and ("Start a federation ban" not in reply.text)
-                    and ("FedBan reason updated" not in reply.text)
-                ):
+                if not any(i in reply.text for i in fban_replies):
                     failed.append(i.fed_name)
-        except BaseException:
+        except Exception:
             failed.append(i.fed_name)
 
     reason = reason if reason else "Não especificado."
@@ -68,7 +80,7 @@ async def fban(event):
     if failed:
         status = f"Falha no FBan em {len(failed)}/{total} federações.\n"
         for i in failed:
-            status += "• " + i + "\n"
+            status += f"• {i}\n"
     else:
         status = f"Sucesso! FBanido em {total} federações."
 
@@ -85,12 +97,12 @@ async def unfban(event):
     except IntegrityError:
         return await event.edit("**Executando em modo não SQL!**")
 
+    match = event.pattern_match.group(1)
     if event.is_reply:
-        reply_msg = await event.get_reply_message()
-        unfban_id = reply_msg.sender_id
-        reason = event.pattern_match.group(1)
+        unfban_id = (await event.get_reply_message()).sender_id
+        reason = match
     else:
-        pattern = str(event.pattern_match.group(1)).split()
+        pattern = match.split()
         unfban_id = pattern[0]
         reason = " ".join(pattern[1:])
 
@@ -102,14 +114,15 @@ async def unfban(event):
     if event.sender_id == unfban_id:
         return await event.edit("**Espere, isso é ilegal**")
 
-    if len(fed_list := get_flist()) == 0:
+    fed_list = get_flist()
+    if len(fed_list) == 0:
         return await event.edit("**Você ainda não se conectou a nenhuma federação!**")
 
     user_link = f"[{unfban_id}](tg://user?id={unfban_id})"
 
     await event.edit(f"**Un-fbanindo **{user_link}**...**")
     failed = []
-    total = int(0)
+    total = 0
 
     for i in fed_list:
         total += 1
@@ -122,13 +135,9 @@ async def unfban(event):
                     conv.chat_id, message=reply, clear_mentions=True
                 )
 
-                if (
-                    ("New un-FedBan" not in reply.text)
-                    and ("I'll give" not in reply.text)
-                    and ("Un-FedBan" not in reply.text)
-                ):
+                if not any(i in reply.text for i in unfban_replies):
                     failed.append(i.fed_name)
-        except BaseException:
+        except Exception:
             failed.append(i.fed_name)
 
     reason = reason if reason else "Não especificado."
@@ -136,7 +145,7 @@ async def unfban(event):
     if failed:
         status = f"Falha ao un-fbanir em {len(failed)}/{total} federações.\n"
         for i in failed:
-            status += "• " + i + "\n"
+            status += f"• {i}\n"
     else:
         status = f"Sucesso! Un-fbanido em {total} federações."
 
@@ -154,7 +163,8 @@ async def addf(event):
     except IntegrityError:
         return await event.edit("**Executando em modo não SQL!**")
 
-    if not (fed_name := event.pattern_match.group(1)):
+    fed_name = event.pattern_match.group(1)
+    if not fed_name:
         return await event.edit("**Passe um nome para se conectar a este grupo!**")
 
     try:
@@ -187,13 +197,14 @@ async def listf(event):
     except IntegrityError:
         return await event.edit("**Executando em modo não SQL!**")
 
-    if len(fed_list := get_flist()) == 0:
+    fed_list = get_flist()
+    if len(fed_list) == 0:
         return await event.edit("**Você ainda não se conectou a nenhuma federação!**")
 
     msg = "**Federações conectadas:**\n\n"
 
     for i in fed_list:
-        msg += "• " + str(i.fed_name) + "\n"
+        msg += f"• {i.fed_name}\n"
 
     await event.edit(msg)
 
@@ -215,6 +226,8 @@ CMD_HELP.update(
         "fban": ">`.fban <id/nome de usuário> <motivo>`"
         "\n**Uso:** Bane o usuário de federações conectadas."
         "\nVocê pode responder ao usuário que deseja fbanir ou passar manualmente o nome de usuário/id."
+        "\n`.dfban` faz o mesmo mas deleta a mensagem."
+
         "\n\n`>.unfban <id/nome de usuário> <motivo>`"
         "\n**Uso:** O mesmo que fban, mas desbane o usuário"
         "\n\n>`.addf <name>`"

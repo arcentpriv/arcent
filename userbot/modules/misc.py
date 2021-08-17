@@ -144,6 +144,11 @@ async def send(event):
 
     chat = event.pattern_match.group(1)
     try:
+        chat = int(chat)
+    except ValueError:
+        pass
+
+    try:
         chat = await event.client.get_entity(chat)
     except (TypeError, ValueError):
         return await event.edit("**Link inválido fornecido!**")
