@@ -170,7 +170,7 @@ GENIUS = os.environ.get("GENIUS_ACCESS_TOKEN")
 USR_TOKEN = os.environ.get("USR_TOKEN_UPTOBOX")
 
 # PurpleBot version
-PURPLEBOT_VERSION = "5.1.0"
+PURPLEBOT_VERSION = "5.1.1"
 
 
 def migration_workaround():
