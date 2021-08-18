@@ -93,7 +93,7 @@ def register(**args):
                     )
                     stdout, stderr = await process.communicate()
                     ftext = (
-                        "\nDisclaimer:\nEste arquivo foi carregado SOMENTE aqui."
+                        "\nAVISO:\nEste arquivo foi carregado SOMENTE aqui."
                         "Registramos apenas o motivo do erro e a data, "
                         "nós respeitamos sua privacidade, você não deve relatar este erro caso existam "
                         "quaisquer dados confidenciais aqui, ninguém vai ver seus dados "

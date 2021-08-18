@@ -75,7 +75,7 @@ BOTLOG = strtobool(os.environ.get("BOTLOG", "False"))
 LOGSPAMMER = strtobool(os.environ.get("LOGSPAMMER", "False"))
 
 # Bleep Blop, this is a bot ;)
-PM_AUTO_BAN = strtobool(os.environ.get("PM_AUTO_BAN", "False"))
+PM_AUTO_BAN = strtobool(os.environ.get("PM_AUTO_BAN",   "True"))
 
 # Heroku Credentials for updater.
 HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME")
@@ -170,7 +170,7 @@ GENIUS = os.environ.get("GENIUS_ACCESS_TOKEN")
 USR_TOKEN = os.environ.get("USR_TOKEN_UPTOBOX")
 
 # PurpleBot version
-PURPLEBOT_VERSION = "5.0.5"
+PURPLEBOT_VERSION = "5.1.0"
 
 
 def migration_workaround():
@@ -208,7 +208,7 @@ if HEROKU_APP_NAME is not None and HEROKU_API_KEY is not None:
 
 
 def shutdown_bot(*_):
-    LOGS.info("Received SIGTERM.")
+    LOGS.info("SIGTERM recebido.")
     bot.disconnect()
     sys.exit(143)
 
