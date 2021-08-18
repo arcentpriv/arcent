@@ -78,7 +78,7 @@ def register(**args):
 
                     date = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
-                    link = "[SUPORTE](https://t.me/Kircheiss)"
+                    link = "[SUPORTE](https://t.me/rokansu)"
                     text = (
                         "**RELATÓRIO DE ERRO DO USERBOT**\n"
                         "Caso queira reportar algum erro"

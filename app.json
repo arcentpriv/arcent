@@ -5,7 +5,7 @@
   "keywords": ["telegram", "userbot", "plugin", "modular", "productivity"],
   "repository": "https://github.com/thewhiteharlot/PurpleBot",
   "website": "https://github.com/thewhiteharlot/PurpleBot",
-  "success_url": "https://t.me/Kircheiss",
+  "success_url": "https://t.me/rokansu",
   "stack": "container",
   "env": {
     "ALIVE_NAME": {

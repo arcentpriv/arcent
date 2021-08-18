@@ -170,7 +170,7 @@ GENIUS = os.environ.get("GENIUS_ACCESS_TOKEN")
 USR_TOKEN = os.environ.get("USR_TOKEN_UPTOBOX")
 
 # PurpleBot version
-PURPLEBOT_VERSION = "5.1.1"
+PURPLEBOT_VERSION = "5.1.2"
 
 
 def shutdown_bot(*_):

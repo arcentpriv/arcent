@@ -75,7 +75,8 @@ async def killdabot(event):
 @register(outgoing=True, pattern=r"^\.readme$")
 async def reedme(e):
     await e.edit(
-        "Aqui estão alguns tutoriais interessantes:\n"
+        "Aqui estão algumas coisas interessantes:\n"
+        "\n[Grupo de Suporte](https://t.me/rokansu)"
         "\n[Arquivo Readme do PurpleBot](https://github.com/thewhiteharlot/PurpleBot/blob/master/README.md)"
         "\n[Guia de configuração - Bot](https://www.youtube.com/watch?v=SBYjQ25ugZY&feature=emb_title&ab_channel=TUDOSEMCORTE) - Créditos: @mandaloriam"
         "\n[Guia de configuração - Google Drive](https://www.youtube.com/watch?v=Z0WFtwDMnes&ab_channel=TUDOSEMCORTE) - Créditos: @ramonazvd"

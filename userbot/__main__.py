@@ -32,7 +32,7 @@ LOGS.info("Seu userbot está em execução!")
 
 LOGS.info(
     "Parabéns, o bot está instalado e funcionando! Envie .help em qualquer chat para mais informações.\n"
-    "Se precisar de ajuda, mande uma mensagem para @Kircheiss (cuidado, ela morde)"
+    "Se precisar de ajuda, entre no grupo de suporte: @rokansu"
 )
 
 bot.run_until_disconnected()

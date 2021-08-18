@@ -23,7 +23,7 @@ API_HASH = input("Insira a API_HASH (o mais longo): ")
 with TelegramClient(StringSession(), API_KEY, API_HASH) as client:
     print("Verifique suas mensagens salvas no telegram!")
     session_string = client.session.save()
-    saved_messages_template = """Suporte: @Kircheiss
+    saved_messages_template = """Suporte: @rokansu
 
 STRING_SESSION: <code>{}</code>
 
