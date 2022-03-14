@@ -28,7 +28,7 @@ Maneira fácil de obter STRING_SESSION. Clique no botão e depois no botão de c
 
 ### ou execute em seu terminal
 ```
-wget https://raw.githubusercontent.com/thewhiteharlot/PurpleBot/master/terminal_getstring.sh && bash terminal_getstring.sh
+wget https://raw.githubusercontent.com/ArcentDo7/arcent/master/terminal_getstring.sh && bash terminal_getstring.sh
 ```
 
 ## Como hospedar?
