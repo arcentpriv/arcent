@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uma Carta para Yasmim</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Vintage Rose -->
+    <!-- Application Structure Plan: A single-page, vertical scrolling narrative designed to be an emotional journey. The structure progresses from an intimate opening, through an interactive timeline of the 20-year relationship, into a section highlighting the core emotional conflict (friendship vs. hidden love), culminating in a powerful, focused confession, and ending with a simple closing. This structure was chosen over a static text display to make the passage of time and the depth of feeling more tangible and impactful for the user (Yasmim), transforming the letter into an experience rather than just a message. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: "20 anos de história". Goal: Show change/duration. Viz: Interactive HTML/CSS vertical timeline. Interaction: On-click reveals memory snippets. Justification: Makes the long history feel real and explorable. Library: Vanilla JS for interaction.
+        2. Report Info: "Amizade vs. sentimento". Goal: Compare/show conflict. Viz: Two-column text layout. Interaction: Scroll-triggered fade-ins. Justification: Visually separates and then unites the two core themes of the author's internal struggle. Library: JS Intersection Observer.
+        3. Report Info: "Eu gosto de você". Goal: Emphasize confession. Viz: Large, centered typography with CSS animation. Interaction: Subtle pulse effect. Justification: Gives the most critical part of the message the focus and emotional weight it deserves. Library: CSS Animations.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FEFBF6;
+            color: #4A4A4A;
+        }
+        h1, h2, h3, .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .pulse {
+            animation: pulse-animation 2s infinite;
+        }
+        @keyframes pulse-animation {
+            0% { text-shadow: 0 0 5px rgba(220, 38, 38, 0); }
+            50% { text-shadow: 0 0 20px rgba(220, 38, 38, 0.3); }
+            100% { text-shadow: 0 0 5px rgba(220, 38, 38, 0); }
+        }
+        .heart, .broken-heart {
+            position: absolute;
+            bottom: -5vh;
+            font-size: 2rem;
+            animation: rise 5s linear forwards;
+            opacity: 1;
+            pointer-events: none;
+        }
+        .broken-heart {
+             color: #6b7280;
+             animation-name: rise-and-wobble;
+        }
+        @keyframes rise {
+            to {
+                transform: translateY(-110vh);
+                opacity: 0;
+            }
+        }
+        @keyframes rise-and-wobble {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-110vh) rotate(15deg);
+                opacity: 0;
+            }
+        }
+        #love-message {
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            pointer-events: none;
+        }
+        #love-message.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="heart-container" class="fixed top-0 left-0 w-full h-full pointer-events-none z-50 overflow-hidden"></div>
+    <div id="love-message" class="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center hidden z-50">
+        <h2 class="text-white text-5xl md:text-8xl font-serif animate-pulse" style="text-shadow: 0 0 15px white;">Eu te amo!</h2>
+    </div>
+
+
+    <main class="container mx-auto max-w-4xl p-4 sm:p-8">
+
+        <header class="text-center h-screen flex flex-col justify-center items-center fade-in-section">
+            <h1 class="text-5xl md:text-7xl font-bold text-rose-800">Para: Yasmin</h1>
+            <p class="mt-4 text-lg text-stone-600">De um velho amigo...</p>
+            <div class="absolute bottom-10 animate-bounce">
+                <svg class="w-8 h-8 text-rose-400" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+        </header>
+
+        <section class="py-20 fade-in-section" id="intro">
+             <div class="text-center max-w-2xl mx-auto">
+                 <h2 class="text-3xl md:text-4xl font-serif text-stone-800 mb-4">O Começo de Tudo</h2>
+                 <p class="text-lg leading-relaxed text-stone-600">
+                    Nem sei direito por onde começar. Talvez com o fato de que já se passaram quase 20 anos. Vinte anos que parecem um piscar de olhos, mas que guardam uma vida inteira de momentos. Esta é a nossa história, contada através das memórias que construímos juntos.
+                 </p>
+            </div>
+        </section>
+
+        <section class="py-12 fade-in-section" id="timeline-section">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                 <h2 class="text-3xl md:text-4xl font-serif text-stone-800 mb-4">Nossa Linha do Tempo</h2>
+                 <p class="text-lg leading-relaxed text-stone-600">
+                    Cada ponto nesta linha do tempo é uma pequena peça do quebra-cabeça que é a nossa amizade. Clique em cada um para relembrar os momentos que nos trouxeram até aqui.
+                 </p>
+            </div>
+            <div class="relative max-w-2xl mx-auto">
+                <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-rose-200"></div>
+                <div id="timeline" class="space-y-12">
+                </div>
+            </div>
+             <div id="timeline-details" class="mt-12 text-center text-xl text-rose-900 font-serif min-h-[5rem] transition-opacity duration-500">
+                <p id="details-text">Clique em um momento para ver os detalhes.</p>
+            </div>
+        </section>
+
+        <section class="py-20 fade-in-section" id="feelings">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                 <h2 class="text-3xl md:text-4xl font-serif text-stone-800 mb-4">O Sentimento Escondido</h2>
+                 <p class="text-lg leading-relaxed text-stone-600">
+                    Com o tempo, algo mudou. A amizade que era nosso porto seguro começou a se transformar em algo mais profundo, um sentimento que eu guardava com medo de estragar a coisa mais importante que eu tinha: você.
+                 </p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+                <div class="bg-rose-50 p-6 rounded-lg shadow-sm">
+                    <h3 class="text-2xl font-serif text-rose-900 mb-3">A Amizade que nos Unia</h3>
+                    <p class="text-stone-700 leading-relaxed">"Você me viu nos meus piores dias e comemorou comigo nos melhores. Você me conhece melhor do que ninguém e, mesmo assim, sempre esteve aí."</p>
+                </div>
+                <div class="bg-amber-50 p-6 rounded-lg shadow-sm">
+                    <h3 class="text-2xl font-serif text-amber-900 mb-3">O Amor que Nascia</h3>
+                    <p class="text-stone-700 leading-relaxed">"Nossos olhares diziam tudo sem precisar de uma palavra. Mas o medo... o medo de estragar a amizade mais importante da minha vida sempre falou mais alto."</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="h-screen flex flex-col justify-center items-center text-center fade-in-section" id="confession">
+             <div class="max-w-3xl mx-auto">
+                <h2 class="text-4xl md:text-6xl font-serif text-rose-800 mb-8">Hoje, a única certeza que eu tenho é essa:</h2>
+                <p class="text-5xl md:text-7xl font-bold text-red-700 font-serif pulse">Eu amo você.</p>
+                <p class="mt-8 text-2xl md:text-3xl text-stone-600">"Não como amigo, não como um irmão de consideração. Gosto de você de um jeito que me faz querer segurar sua mão e não soltar nunca mais."</p>
+             </div>
+        </section>
+
+        <footer class="text-center py-20 fade-in-section">
+            <p class="text-2xl font-serif text-stone-700">Com todo o carinho do mundo,</p>
+            <p class="text-3xl font-serif text-rose-900 mt-2">Seu eterno admirador.</p>
+            
+            <div id="proposal-section" class="mt-24 pt-12 border-t border-rose-200 transition-opacity duration-500">
+                <h3 class="text-2xl md:text-3xl font-serif text-rose-800 mb-8">Quer namorar comigo?</h3>
+                <div class="flex justify-center items-center gap-4">
+                    <button id="yes-button" class="bg-rose-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-rose-700 transition-transform transform hover:scale-105">Sim</button>
+                    <button id="no-button" class="bg-stone-300 text-stone-700 font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-stone-400 transition-transform transform hover:scale-105">Não</button>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.fade-in-section');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            const timelineData = [
+                {
+                    title: "Pré-escola",
+                    description: "Eu consigo lembrar de você na pré-escola, com o cabelo amarrado e o sorriso meio tímido. Desde aquela época, eu já sabia que você era especial."
+                },
+                {
+                    title: "Anos de Escola",
+                    description: "Crescemos juntos, vivemos juntos."
+                },
+                {
+                    title: "Apoio Incondicional",
+                    description: "Quando você me ouvia, ou desabafou comigo... cada um desses momentos construiu o que sinto."
+                },
+                {
+                    title: "A Passagem do Tempo",
+                    description: "É engraçado pensar que já faz quase 20 anos que a gente se conhece. E todo esse tempo só serviu para me dar uma certeza."
+                }
+            ];
+            
+            const timelineContainer = document.getElementById('timeline');
+            const detailsText = document.getElementById('details-text');
+
+            timelineData.forEach((item, index) => {
+                const alignment = index % 2 === 0 ? 'md:ml-auto' : 'md:mr-auto';
+                const textAlign = index % 2 === 0 ? 'md:text-left' : 'md:text-right';
+                const pointPosition = index % 2 === 0 ? 'md:left-1/2 md:-translate-x-1/2' : 'md:left-1/2 md:-translate-x-1/2';
+                
+                const timelineItem = document.createElement('div');
+                timelineItem.className = `timeline-item relative w-full md:w-1/2 ${alignment} p-4`;
+                timelineItem.innerHTML = `
+                    <div class="absolute top-5 -translate-y-1/2 left-1/2 -translate-x-1/2 md:top-5 ${pointPosition} w-4 h-4 bg-rose-400 rounded-full border-4 border-rose-100 cursor-pointer hover:scale-125 transition-transform"></div>
+                    <div class="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow ${textAlign}">
+                        <h3 class="text-xl font-serif text-rose-800">${item.title}</h3>
+                    </div>
+                `;
+                timelineItem.querySelector('.cursor-pointer').addEventListener('click', () => {
+                    detailsText.style.opacity = 0;
+                    setTimeout(() => {
+                        detailsText.textContent = item.description;
+                        detailsText.style.opacity = 1;
+                    }, 300);
+                });
+                
+                timelineContainer.appendChild(timelineItem);
+            });
+
+            const yesButton = document.getElementById('yes-button');
+            const noButton = document.getElementById('no-button');
+            const heartContainer = document.getElementById('heart-container');
+            const proposalSection = document.getElementById('proposal-section');
+            const loveMessage = document.getElementById('love-message');
+
+            function createHeart() {
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+                heart.innerHTML = '&#10084;';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                heart.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
+                
+                const colors = ['#ff0000', '#ff4d4d', '#e60000', '#ffc2c2', '#ff8080'];
+                heart.style.color = colors[Math.floor(Math.random() * colors.length)];
+
+                heartContainer.appendChild(heart);
+
+                setTimeout(() => {
+                    heart.remove();
+                }, 5000);
+            }
+
+            function createBrokenHeart() {
+                const heart = document.createElement('div');
+                heart.classList.add('broken-heart');
+                heart.innerHTML = '&#128148;'; // Broken heart emoji
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                heart.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
+                
+                heartContainer.appendChild(heart);
+
+                setTimeout(() => {
+                    heart.remove();
+                }, 5000);
+            }
+
+            yesButton.addEventListener('click', () => {
+                proposalSection.style.opacity = '0';
+                loveMessage.classList.remove('hidden');
+                setTimeout(() => loveMessage.classList.add('visible'), 100);
+                
+                const heartInterval = setInterval(createHeart, 100);
+                setTimeout(() => clearInterval(heartInterval), 5000);
+            });
+
+            noButton.addEventListener('click', () => {
+                proposalSection.style.opacity = '0';
+                const heartInterval = setInterval(createBrokenHeart, 100);
+                setTimeout(() => clearInterval(heartInterval), 5000);
+            });
+        });
+    </script>
+</body>
+</html>
